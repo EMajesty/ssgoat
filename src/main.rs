@@ -65,13 +65,13 @@ fn create_header(mut title: &str, in_path: &str) -> String {
     let mut header_html = String::from("<!DOCTYPE html><html><head><title>");
     header_html.push_str(title);
     header_html.push_str("</title>");
-    header_html.push_str("<link rel=\"stylesheet\" href=");
+    header_html.push_str("<link rel=\"stylesheet\" href=\"");
     
     for _ in 0..depth - 2 {
         header_html.push_str("../");
     }
 
-    header_html.push_str("\"resources/css/style.css\">");
+    header_html.push_str("resources/css/style.css\">");
     header_html.push_str("</head><body>");
     header_html
 }
