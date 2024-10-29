@@ -37,15 +37,12 @@ fn main() {
         }
     }
 
-    let mut html;
-
-    let sidebar = create_sidebar(&file_list, &in_path);
-    let footer = create_footer();
-
     for file in &file_list {
-        let header = create_header(file.to_str().unwrap(), in_path);
-        html = convert_file(&file);
-        html = format!("{}{}{}{}", header, sidebar, html, footer);
+        let header = create_header(&file.to_str().unwrap(), &in_path);
+        let sidebar = create_sidebar(&file.to_str().unwrap(), &file_list, &in_path);
+        let footer = create_footer();
+        let mut html = convert_file(&file);
+        html = format!("{}{}{}{}", &header, &sidebar, &html, &footer);
         write_file(html, file, &in_path, &out_path);
     }
 
@@ -62,8 +59,6 @@ fn convert_file(path: &Path) -> String {
 fn create_header(mut title: &str, in_path: &str) -> String {
     let depth = &title.chars().filter(|&x| x == '/').count();
 
-    dbg!(&title);
-    dbg!(&depth);
     title = title.strip_prefix(in_path).unwrap()
         .strip_prefix("/").unwrap()
         .strip_suffix(".md").unwrap();
@@ -81,7 +76,9 @@ fn create_header(mut title: &str, in_path: &str) -> String {
     header_html
 }
 
-fn create_sidebar(file_list: &Vec<PathBuf>, in_path: &str) -> String {
+fn create_sidebar(current_file: &str, file_list: &Vec<PathBuf>, in_path: &str) -> String {
+    let depth = &current_file.chars().filter(|&x| x == '/').count();
+
     let mut sidebar_html = String::from("<div class\"sidebar\"><ul>");
 
     for file in file_list {
@@ -92,7 +89,13 @@ fn create_sidebar(file_list: &Vec<PathBuf>, in_path: &str) -> String {
             .strip_prefix(in_path).unwrap()
             .strip_prefix("/").unwrap()
             .strip_suffix(".md").unwrap();
-        sidebar_html.push_str(&format!("<li><a href=\"{}.html\">{}</a></li>",
+        sidebar_html.push_str("<li><a href=\"");
+
+        for _ in 0..depth - 2 {
+            sidebar_html.push_str("../");
+        }
+
+        sidebar_html.push_str(&format!("{}.html\">{}</a></li>",
                 &clean_path, &file_name));
         dbg!(file_name);
         dbg!(clean_path);
