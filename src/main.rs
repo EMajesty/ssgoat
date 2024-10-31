@@ -48,7 +48,6 @@ fn main() {
         match entry {
             Ok(path) => {
                 if !is_hidden(&path) {
-                    dbg!(&path);
                     file_list.push(path);
                 }
             }
@@ -70,7 +69,7 @@ fn main() {
         write_file(html, file, &out_path);
     }
 
-    println!("{}", "> Collecting resource files".blue());
+    println!("{}", "> Collecting resources".blue());
     collect_resources(&in_path, &out_path);
 
     println!("{}", "> Done".green());
@@ -85,8 +84,6 @@ fn convert_file(path: &Path) -> String {
 }
 
 fn create_header(mut title: &str, in_path: &str) -> String {
-    // let depth = &title.chars().filter(|&x| x == '/').count();
-
     title = title
         .strip_prefix(in_path)
         .unwrap()
@@ -98,12 +95,6 @@ fn create_header(mut title: &str, in_path: &str) -> String {
     header_html.push_str(&title);
     header_html.push_str("</title>");
     header_html.push_str("<link rel=\"stylesheet\" href=\"");
-
-    // for _ in 0..depth - 2 {
-    // header_html.push_str("../");
-    // }
-
-    // header_html.push_str("resources/css/style.css\">");
     header_html.push_str("style.css\">");
     header_html.push_str("</head><body>");
     header_html.push_str("<div class=\"header\">");
@@ -114,40 +105,16 @@ fn create_header(mut title: &str, in_path: &str) -> String {
 }
 
 fn create_sidebar(file_list: &Vec<PathBuf>) -> String {
-    // let depth = &current_file.chars().filter(|&x| x == '/').count();
-
     let mut sidebar_html = String::from("<div class=\"sidebar\"><ul>");
 
     for file in file_list {
         let file_name = file.with_extension("html");
         let file_name = file_name.file_name().unwrap().to_str().unwrap();
-        //     .file_name()
-        //     .unwrap()
-        //     .to_str()
-        //     .unwrap()
-        //     .strip_suffix(".md")
-        //     .unwrap();
-        // let clean_path = file
-        //     .to_str()
-        //     .unwrap()
-        //     .strip_prefix(in_path)
-        //     .unwrap()
-        //     .strip_prefix("/")
-        //     .unwrap()
-        //     .strip_suffix(".md")
-        //     .unwrap();
         sidebar_html.push_str(&format!(
             "<li><a href=\"{}\">{}</a></li>",
             file_name,
             file_name.strip_suffix(".html").unwrap()
         ));
-        // sidebar_html.push_str("<li><a href=\"");
-        //
-        // for _ in 0..depth - 2 {
-        //     sidebar_html.push_str("../");
-        // }
-        //
-        // sidebar_html.push_str(&format!("{}.html\">{}</a></li>", &clean_path, &file_name));
     }
 
     sidebar_html.push_str("</ul></div>");
@@ -161,12 +128,6 @@ fn create_footer() -> String {
 }
 
 fn write_file(html: String, path: &Path, out_path: &str) {
-    // let write_path = path.strip_prefix(in_path).unwrap().with_extension("html");
-    // let write_path = format!("{}/{}", out_path, write_path.display());
-    //
-    // if let Some(parent) = Path::new(&write_path).parent() {
-    //     fs::create_dir_all(parent).expect("Failed to create directory");
-    // }
     let file_name = path.with_extension("html");
     let file_name = file_name.file_name().unwrap().to_str().unwrap();
     let write_path = format!("{}/{}", out_path, file_name);
