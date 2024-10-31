@@ -62,9 +62,10 @@ fn main() {
     for file in &file_list {
         println!("{}", file.display());
 
-        let header = create_header(&file.to_str().unwrap(), &in_path);
-        let footer = create_footer();
         let mut html = convert_file(&file);
+
+        let header = create_header(&html, &in_path);
+        let footer = create_footer();
         html = format!("{}{}{}{}", &header, &sidebar, &html, &footer);
         write_file(html, file, &out_path);
     }
@@ -83,14 +84,14 @@ fn convert_file(path: &Path) -> String {
     return html;
 }
 
-fn create_header(mut title: &str, in_path: &str) -> String {
-    title = title
-        .strip_prefix(in_path)
-        .unwrap()
-        .strip_prefix("/")
-        .unwrap()
-        .strip_suffix(".md")
-        .unwrap();
+fn create_header(html: &String, in_path: &str) -> String {
+    let mut title = ' '.into();
+
+    match find_title(html) {
+        Some(content) => title = content,
+        None => println!("No h1 tag found in file {}", &in_path),
+    }
+
     let mut header_html = String::from("<!DOCTYPE html><html><head><title>");
     header_html.push_str(&title);
     header_html.push_str("</title>");
@@ -98,7 +99,7 @@ fn create_header(mut title: &str, in_path: &str) -> String {
     header_html.push_str("style.css\">");
     header_html.push_str("</head><body>");
     header_html.push_str("<div class=\"header\">");
-    header_html.push_str(&format!("<h1>{}</h1>", &title));
+    // header_html.push_str(&format!("<h1>{}</h1>", &title));
     header_html.push_str("</div>");
     header_html.push_str("<div class=\"container\">");
     header_html
@@ -167,4 +168,11 @@ fn is_hidden(path: &PathBuf) -> bool {
             .map(|s| s.starts_with('.'))
             .unwrap_or(false)
     })
+}
+
+fn find_title(html: &str) -> Option<String> {
+    let start = html.find("<h1")?;
+    let end = html[start..].find("</h1>")?;
+    let title_start = html[start..].find('>')?;
+    Some(html[start + title_start + 1..start + end].trim().to_string())
 }
