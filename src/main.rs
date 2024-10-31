@@ -47,7 +47,10 @@ fn main() {
     for entry in glob(&search_path).expect("Failed to read glob pattern") {
         match entry {
             Ok(path) => {
-                file_list.push(path);
+                if !is_hidden(&path) {
+                    dbg!(&path);
+                    file_list.push(path);
+                }
             }
             Err(e) => println!("{:?}", e),
         }
@@ -133,7 +136,11 @@ fn create_sidebar(file_list: &Vec<PathBuf>) -> String {
         //     .unwrap()
         //     .strip_suffix(".md")
         //     .unwrap();
-        sidebar_html.push_str(&format!("<li><a href=\"{}\">{}</a></li>", file_name, file_name.strip_suffix(".html").unwrap()));
+        sidebar_html.push_str(&format!(
+            "<li><a href=\"{}\">{}</a></li>",
+            file_name,
+            file_name.strip_suffix(".html").unwrap()
+        ));
         // sidebar_html.push_str("<li><a href=\"");
         //
         // for _ in 0..depth - 2 {
@@ -178,13 +185,25 @@ fn collect_resources(in_path: &str, out_path: &str) {
         for entry in glob(&search_path).expect("Failed to read glob pattern") {
             match entry {
                 Ok(file) => {
-                    println!("{}", file.display());
-                    let file_name = file.file_name().unwrap();
-                    let destination_path = format!("{}{}", write_path, file_name.to_str().unwrap());
-                    fs::copy(file, destination_path).unwrap();
+                    if !is_hidden(&file) {
+                        println!("{}", file.display());
+                        let file_name = file.file_name().unwrap();
+                        let destination_path =
+                            format!("{}{}", write_path, file_name.to_str().unwrap());
+                        fs::copy(file, destination_path).unwrap();
+                    }
                 }
                 Err(e) => println!("{:?}", e),
             }
         }
     }
+}
+
+fn is_hidden(path: &PathBuf) -> bool {
+    path.iter().any(|component| {
+        component
+            .to_str()
+            .map(|s| s.starts_with('.'))
+            .unwrap_or(false)
+    })
 }
