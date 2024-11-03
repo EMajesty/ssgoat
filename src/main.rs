@@ -61,9 +61,7 @@ fn main() {
 
     for file in &file_list {
         println!("{}", file.display());
-
         let mut html = convert_file(&file);
-
         let header = create_header(&html, &in_path);
         let footer = create_footer();
         html = format!("{}{}{}{}", &header, &sidebar, &html, &footer);
@@ -141,7 +139,7 @@ fn write_file(html: String, path: &Path, out_path: &str) {
 fn collect_resources(in_path: &str, out_path: &str) {
     let write_path = format!("{}/", out_path);
     for extension in &[
-        "jpg", "png", "gif", "svg", "css", "ttf", "otf", "woff", "woff2",
+        "jpg", "png", "gif", "svg", "css", "ttf", "otf", "woff", "woff2", "ogg",
     ] {
         let search_path = format!("{}{}{}", in_path, "/**/*.", extension);
         for entry in glob(&search_path).expect("Failed to read glob pattern") {
@@ -174,5 +172,9 @@ fn find_title(html: &str) -> Option<String> {
     let start = html.find("<h1")?;
     let end = html[start..].find("</h1>")?;
     let title_start = html[start..].find('>')?;
-    Some(html[start + title_start + 1..start + end].trim().to_string())
+    Some(
+        html[start + title_start + 1..start + end]
+            .trim()
+            .to_string(),
+    )
 }
