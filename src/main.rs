@@ -139,7 +139,7 @@ fn write_file(html: String, path: &Path, out_path: &str) {
 fn collect_resources(in_path: &str, out_path: &str) {
     let write_path = format!("{}/", out_path);
     for extension in &[
-        "jpg", "png", "gif", "bmp", "svg", "css", "ttf", "otf", "woff", "woff2", "ogg",
+        "js", "jpg", "png", "gif", "bmp", "svg", "css", "ttf", "otf", "woff", "woff2", "ogg",
     ] {
         let search_path = format!("{}{}{}", in_path, "/**/*.", extension);
         for entry in glob(&search_path).expect("Failed to read glob pattern") {
